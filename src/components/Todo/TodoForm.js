@@ -1,75 +1,73 @@
 import React, { useRef, useEffect, useState } from "react";
-
-export default TodoForm = (props) => {
+import * as ReactBootstrap from 'react-bootstrap';
+import { useSelector } from 'react-redux';
+const TodoForm = (props) => {
+    const PersonsList = useSelector((state) => state.persons.value);
     return (
-        <Form>
-            <Form.Group>
-                <Row>
-                    <Form.Label className="col-md-4">
+        <ReactBootstrap.Form className="p-2">
+            <ReactBootstrap.Form.Group className="mt-2">
+                <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Label className="col-md-4">
                         Title
-                    </Form.Label>
-                    <Form.Control className="col-md-8" type="text" value={props.formData.title} />
-                </Row>
-                {props.error.name && <Row>
-                    <Form.Text className="text-muted">{props.error.title}</Form.Text>
-                </Row>}
-            </Form.Group>
-            <Form.Group>
-                <Row>
-                    <Form.Label className="col-md-4">
+                    </ReactBootstrap.Form.Label>
+                    <ReactBootstrap.Form.Control className="col-md-8" type="text" value={props.formData.title} />
+                </ReactBootstrap.Row>
+                {props.error.name && <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Text className="text-muted">{props.error.title}</ReactBootstrap.Form.Text>
+                </ReactBootstrap.Row>}
+            </ReactBootstrap.Form.Group>
+            <ReactBootstrap.Form.Group className="mt-2">
+                <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Label className="col-md-4">
                         Description
-                    </Form.Label>
-                    <Form.Control className="col-md-8" as="textarea" value={props.formData.description} />
-                </Row>
-                {props.error.description && <Row>
-                    <Form.Text className="text-muted">{props.error.description}</Form.Text>
-                </Row>}
-            </Form.Group>
-            <Form.Group>
-                <Row>
-                    <Form.Label className="col-md-4">
+                    </ReactBootstrap.Form.Label>
+                    <ReactBootstrap.Form.Control className="col-md-8" as="textarea" value={props.formData.description} />
+                </ReactBootstrap.Row>
+                {props.error.description && <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Text className="text-muted">{props.error.description}</ReactBootstrap.Form.Text>
+                </ReactBootstrap.Row>}
+            </ReactBootstrap.Form.Group>
+            <ReactBootstrap.Form.Group className="mt-2">
+                <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Label className="col-md-4">
                         Person
-                    </Form.Label>
-                    <Form.Select className="col-md-8">
-                        <option value="">
-
-                        </option>
-                    </Form.Select>
-                </Row>
-                {props.error.person && <Row>
-                    <Form.Text className="text-muted">{props.error.person}</Form.Text>
-                </Row>}
-            </Form.Group>
-            <Form.Group>
-                <Row>
-                    <Form.Label>
+                    </ReactBootstrap.Form.Label>
+                    <ReactBootstrap.Form.Select className="col-md-8">
+                    {PersonsList.map(personName=>{return <option value={personName}>{personName}</option>})}
+                    </ReactBootstrap.Form.Select>
+                </ReactBootstrap.Row>
+                {props.error.person && <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Text className="text-muted">{props.error.person}</ReactBootstrap.Form.Text>
+                </ReactBootstrap.Row>}
+            </ReactBootstrap.Form.Group>
+            <ReactBootstrap.Form.Group className="mt-2">
+                <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Label>
                         Start Date
-                    </Form.Label>
-                    <Form.Control as="date" value={props.formData.startDate} />
-                </Row>
-                {props.error.startDate && <Row>
-                    <Form.Text className="text-muted">{props.error.startDate}</Form.Text>
-                </Row>}
-            </Form.Group>
-            <Form.Group>
-                <Row>
-                    <Form.Label>
+                    </ReactBootstrap.Form.Label>
+                    <ReactBootstrap.Form.Control type="date" value={props.formData.startDate} />
+                </ReactBootstrap.Row>
+                {props.error.startDate && <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Text className="text-muted">{props.error.startDate}</ReactBootstrap.Form.Text>
+                </ReactBootstrap.Row>}
+            </ReactBootstrap.Form.Group>
+            <ReactBootstrap.Form.Group className="mt-2">
+                <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Label>
                         End Date
-                    </Form.Label>
-                    <Form.Control as="date" value={props.formData.endDate} />
-                </Row>
-                {props.error.endDate && <Row>
-                    <Form.Text className="text-muted">{props.error.endDate}</Form.Text>
-                </Row>}
-            </Form.Group>
-            <Form.Group className="row d-flex float-right" >
-                <Button>
-                    Clear
-                </Button>
-                <Button>
-                    Submit
-                </Button>
-            </Form.Group>
-        </Form>
+                    </ReactBootstrap.Form.Label>
+                    <ReactBootstrap.Form.Control type="date" value={props.formData.endDate} />
+                </ReactBootstrap.Row>
+                {props.error.endDate && <ReactBootstrap.Row>
+                    <ReactBootstrap.Form.Text className="text-muted">{props.error.endDate}</ReactBootstrap.Form.Text>
+                </ReactBootstrap.Row>}
+            </ReactBootstrap.Form.Group>
+            <ReactBootstrap.Form.Group className="row mt-2" >
+                <ReactBootstrap.Button className="m-1">Submit</ReactBootstrap.Button>
+                <ReactBootstrap.Button className="m-1">Clear</ReactBootstrap.Button>
+            </ReactBootstrap.Form.Group>
+        </ReactBootstrap.Form>
     )
 }
+
+export default TodoForm;

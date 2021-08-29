@@ -3,7 +3,8 @@ import { Container, Row, Navbar, Nav, Col, Card, CardDeck, ListGroup, ListGroupI
 import TodoForm from './TodoForm';
 import TodoTable from './TodoTable';
 import CreatePerson from './CreatePerson';
-export default MainPage = () => {
+import * as ReactBootstrap from 'react-bootstrap';
+const MainPage = () => {
     const [formstate, setFormState] = useState({
         title: '',
         person: '',
@@ -21,7 +22,7 @@ export default MainPage = () => {
     const [tableState, setTableState] = useState({
         action: 'create',
         active: 1,
-        tableDate: [],
+        tableData: [],
     });
     const [personState, setPersonState] = useState({
         showPopUp: false
@@ -36,7 +37,6 @@ export default MainPage = () => {
     const formAction = (action) => {
         switch (action) {
             case "create":
-                createTodo();
                 break;
             case "edit":
                 break;
@@ -56,70 +56,120 @@ export default MainPage = () => {
              endDate: endDate,
         })
     }
-    const createTodo = async () =>{
+    const validations = async () =>{
+        let uniqTitles = tableState.tableData.map(value=>{return value.title});
         if (!formstate.title.trim()) {
             await commonFormState(
                 setErrorState,
                 errorState,
                 'Title is mandatory',
-                person,
-                description, 
-                startDate, 
-                endDate
+                errorState.person,
+                errorState.description, 
+                errorState.startDate, 
+                errorState.endDate
             )
             return 
         } else if(!formstate.description.trim()) {
             await commonFormState(
                 setErrorState,
                 errorState,
-                title,
-                person,
+                errorState.title,
+                errorState.person,
                 'Description is mandatory', 
-                startDate, 
-                endDate
+                errorState.startDate, 
+                errorState.endDate
             )
             return 
         } else if(!formstate.person.trim()) {
             await commonFormState(
                 setErrorState,
                 errorState,
-                title,
+                errorState.title,
                 'Person is mandatory',
-                description, 
-                startDate, 
-                endDate
+                errorState.description, 
+                errorState.startDate, 
+                errorState.endDate
             )
             return 
         } else if (!formstate.startDate || !formstate.endDate) {
             await commonFormState(
                 setErrorState,
                 errorState,
-                title,
-                person,
-                description, 
-                ! startDate ? "StartDate is mandatory" : startDate,
-                ! endDate ? "EndDate is mandatory" : endDate,   
+                errorState.title,
+                errorState.person,
+                errorState.description, 
+                ! errorState.startDate ? "StartDate is mandatory" : errorState.startDate,
+                ! errorState.endDate ? "EndDate is mandatory" : errorState.endDate,   
             )
             return 
-        } else {
-            await commonFormState(setErrorState, errorState, '', '', '', '', ''); //reset all values
-            await commonFormState(setFormState, formstate, '', '', '', '', ''); //reset all values
+        } else if(formstate.startDate > formstate.endDate) {
+            await commonFormState(
+                setErrorState,
+                errorState,
+                errorState.title,
+                errorState.person,
+                errorState.description, 
+                "please select correct date",
+                "please select correct date",   
+            )
+            return 
+        }else if(
+            (tableState.action === 'create' && uniqTitles.includes(formstate.title.trim())) ||
+            tableState.action !== 'create' && uniqTitles.includes(formstate.title.trim()).length > 1
+            ) {
+            await commonFormState(
+                setErrorState,
+                errorState,
+                "Please enter unique title",
+                errorState.person,
+                errorState.description, 
+                errorState.startDate,
+                errorState.endDate,   
+            )
+            return 
         }
+            await commonFormState(setErrorState, errorState, '', '', '', '', ''); //reset all error values
+            await commonFormState(setFormState, formstate, '', '', '', '', '');  //reset all form values
+       return true;
+    }
+    const showHidePersonPopUp = () =>{
+        setPersonState({
+            ...personState,
+            showPopUp:!personState.showPopUp
+        });
+    }
+    const PersonPopUp = () =>{
+       return <ReactBootstrap.Modal
+        size="lg"
+        show={personState.showPopUp}
+        onHide={(e) => showHidePersonPopUp()}
+        aria-labelledby="example-modal-sizes-title-sm">
+            <ReactBootstrap.Modal.Header closeButton>
+                <ReactBootstrap.Modal.Title>
+                    Person Overview
+                </ReactBootstrap.Modal.Title>
+            </ReactBootstrap.Modal.Header>
+            <ReactBootstrap.Modal.Body>
+            {CreatePerson()}
+            </ReactBootstrap.Modal.Body>
+        </ReactBootstrap.Modal>
     }
     return (
-        <Container>
-            <Row className="float-right">
-                <Button onClick={formAction,0}>New Todo</Button>
-                <Button>Persons</Button>
-            </Row>
-            <Row>
-                <Col className="col-md-6">
+        <ReactBootstrap.Container>
+            <ReactBootstrap.Row className="float-right">
+                <ReactBootstrap.Button onClick={(e)=>formAction,0}>New Todo</ReactBootstrap.Button>
+                <ReactBootstrap.Button onClick={(e)=>showHidePersonPopUp()}>Persons</ReactBootstrap.Button>
+            </ReactBootstrap.Row>
+            <ReactBootstrap.Row>
+                <ReactBootstrap.Col className="col-md-8">
                     <TodoTable tableData={tableState} FormAction={formAction}/>
-                </Col>
-                <Col className="col-md-6">
+                </ReactBootstrap.Col>
+                <ReactBootstrap.Col className="col-md-4">
                     <TodoForm formData={formstate} error={errorState} />
-                </Col>
-            </Row>
-        </Container>
+                </ReactBootstrap.Col>
+            </ReactBootstrap.Row>
+            {PersonPopUp()}
+        </ReactBootstrap.Container>
     )
 }
+export default MainPage;
