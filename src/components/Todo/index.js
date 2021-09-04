@@ -19,24 +19,38 @@ const MainPage = () => {
         startDate: '',
         endDate: '',
     });
-    const [tableState, setTableState] = useState({
-        action: 'create',
-        active: 1,
-        tableData: [],
+    const [overViewState, setoverViewState] = useState({
+        todoAction: 'create',
+        todos: [],
     });
     const [personState, setPersonState] = useState({
         showPopUp: false
     })
-    const createNewTodo = () => {
-
+    const createNewTodo = async() => {
+        let {title, person, description, startDate, endDate} = formstate;
+        let {todos} = overViewState;
+        let finalData = 
+        {    'id': await Math.random(),
+            'title': title,
+            'person': person,
+            'description': description,
+            'startDate': startDate,
+            'endDate': endDate,
+    };
+        // console.log(Object.entries(finalData));
+        await setoverViewState({
+            ...overViewState,
+            todos:[...todos,finalData]
+        })
     }
-
     const openPersonPopUp = () => {
 
     }
-    const formAction = (action) => {
-        switch (action) {
+    const formtodoAction = () => {
+        console.log(overViewState);
+        switch (overViewState.todoAction) {
             case "create":
+                createNewTodo();
                 break;
             case "edit":
                 break;
@@ -57,8 +71,9 @@ const MainPage = () => {
         })
     }
     const validations = async () =>{
-        let uniqTitles = tableState.tableData.map(value=>{return value.title});
-        if (!formstate.title.trim()) {
+        console.log(overViewState);
+        let uniqTitles = overViewState.todos.length>0 ? overViewState.todos.map(value=>{return value.title}) :[];
+        if (! formstate.title.trim()) {
             await commonFormState(
                 setErrorState,
                 errorState,
@@ -69,35 +84,35 @@ const MainPage = () => {
                 errorState.endDate
             )
             return 
-        } else if(!formstate.description.trim()) {
+        } else if(! formstate.description.trim()) {
             await commonFormState(
                 setErrorState,
                 errorState,
-                errorState.title,
+                '',
                 errorState.person,
                 'Description is mandatory', 
                 errorState.startDate, 
                 errorState.endDate
             )
             return 
-        } else if(!formstate.person.trim()) {
+        } else if(! formstate.person.trim()) {
             await commonFormState(
                 setErrorState,
                 errorState,
-                errorState.title,
+                '',
                 'Person is mandatory',
-                errorState.description, 
+                '', 
                 errorState.startDate, 
                 errorState.endDate
             )
             return 
-        } else if (!formstate.startDate || !formstate.endDate) {
+        } else if (! formstate.startDate || !formstate.endDate) {
             await commonFormState(
                 setErrorState,
                 errorState,
-                errorState.title,
-                errorState.person,
-                errorState.description, 
+                '',
+                '',
+                '', 
                 ! errorState.startDate ? "StartDate is mandatory" : errorState.startDate,
                 ! errorState.endDate ? "EndDate is mandatory" : errorState.endDate,   
             )
@@ -106,30 +121,28 @@ const MainPage = () => {
             await commonFormState(
                 setErrorState,
                 errorState,
-                errorState.title,
-                errorState.person,
-                errorState.description, 
+                '',
+                '',
+                '', 
                 "please select correct date",
                 "please select correct date",   
             )
             return 
         }else if(
-            (tableState.action === 'create' && uniqTitles.includes(formstate.title.trim())) ||
-            tableState.action !== 'create' && uniqTitles.includes(formstate.title.trim()).length > 1
+            (overViewState.todoAction === 'create' && uniqTitles.includes(formstate.title.trim())) ||
+            overViewState.todoAction !== 'create' && uniqTitles.includes(formstate.title.trim()).length > 1
             ) {
             await commonFormState(
                 setErrorState,
                 errorState,
                 "Please enter unique title",
-                errorState.person,
-                errorState.description, 
-                errorState.startDate,
-                errorState.endDate,   
+                "",
+                "", 
+                "",
+                "",   
             )
             return 
         }
-            await commonFormState(setErrorState, errorState, '', '', '', '', ''); //reset all error values
-            await commonFormState(setFormState, formstate, '', '', '', '', '');  //reset all form values
        return true;
     }
     const showHidePersonPopUp = () =>{
@@ -137,6 +150,73 @@ const MainPage = () => {
             ...personState,
             showPopUp:!personState.showPopUp
         });
+    }
+    const onChangeTitile = (e) =>{
+        commonFormState(
+            setFormState,
+            formstate,
+            e.target.value,
+            formstate.person,
+            formstate.description, 
+            formstate.startDate, 
+            formstate.endDate
+        )
+    }
+    const onChangeDescription =(e)=>{
+        commonFormState(
+            setFormState,
+            formstate,
+            formstate.title,
+            formstate.person,
+            e.target.value, 
+            formstate.startDate, 
+            formstate.endDate
+        )
+    }
+    const onChangeStartDate = (e) =>{
+        commonFormState(
+            setFormState,
+            formstate,
+            formstate.title,
+            formstate.person,
+            formstate.description,
+            e.target.value, 
+            formstate.endDate
+        )
+    }
+    const onChangeEndDate = (e) =>{
+        commonFormState(
+            setFormState,
+            formstate,
+            formstate.title,
+            formstate.person,
+            formstate.description,
+            formstate.startDate,
+            e.target.value, 
+        )
+    }
+    const onChangePersons =(e) =>{
+        commonFormState(
+            setFormState,
+            formstate,
+            formstate.title,
+            e.target.value, 
+            formstate.description,
+            formstate.startDate,
+            formstate.endDate,
+        )
+    }
+    const formSubmit = async () =>{
+        if (await validations()) { 
+            await formtodoAction();
+            await commonFormState(setErrorState, errorState, '', '', '', '', ''); //reset all error values
+           await commonFormState(setFormState, formstate, '', '', '', '', '');  //reset all form values
+        }
+    }
+
+    const formReset =async () =>{
+        await commonFormState(setErrorState, errorState, '', '', '', '', ''); //reset all error values
+        await commonFormState(setFormState, formstate, '', '', '', '', '');  //reset all form values
     }
     const PersonPopUp = () =>{
        return <ReactBootstrap.Modal
@@ -156,16 +236,25 @@ const MainPage = () => {
     }
     return (
         <ReactBootstrap.Container>
-            <ReactBootstrap.Row className="float-right">
-                <ReactBootstrap.Button onClick={(e)=>formAction,0}>New Todo</ReactBootstrap.Button>
-                <ReactBootstrap.Button onClick={(e)=>showHidePersonPopUp()}>Persons</ReactBootstrap.Button>
-            </ReactBootstrap.Row>
             <ReactBootstrap.Row>
+                <ReactBootstrap.Button className="col-md-2 m-2"  onClick={(e)=>formtodoAction,0}>New Todo</ReactBootstrap.Button>
+                <ReactBootstrap.Button className="col-md-2 m-2" onClick={(e)=>showHidePersonPopUp()}>Persons</ReactBootstrap.Button>
+            </ReactBootstrap.Row>
+            <ReactBootstrap.Row className="mt-2">
                 <ReactBootstrap.Col className="col-md-8">
-                    <TodoTable tableData={tableState} FormAction={formAction}/>
+                    <TodoTable tabelData={overViewState} FormtodoAction={formtodoAction}/>
                 </ReactBootstrap.Col>
                 <ReactBootstrap.Col className="col-md-4">
-                    <TodoForm formData={formstate} error={errorState} />
+                    <TodoForm
+                        formData={formstate}
+                        error={errorState}
+                        onChangeTitile={(e)=>onChangeTitile(e)}
+                        onChangeDescription={(e)=>onChangeDescription(e)}
+                        onChangeStartDate={(e)=>onChangeStartDate(e)}
+                        onChangeEndDate={(e)=>onChangeEndDate(e)}
+                        onChangePersons={(e)=>onChangePersons(e)}
+                        formSubmit={(e)=>formSubmit(e)}
+                        formReset={(e)=>formReset(e)} />
                 </ReactBootstrap.Col>
             </ReactBootstrap.Row>
             {PersonPopUp()}

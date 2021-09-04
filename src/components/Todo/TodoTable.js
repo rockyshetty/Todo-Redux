@@ -2,8 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import * as ReactBootstrap from 'react-bootstrap';
 const  TodoTable = (props) => {
     return (
-        <ReactBootstrap.Container>
-        <table striped bordered hover>
+        <ReactBootstrap.Table striped bordered hover>
             <thead>
                 <tr>
                     <th>Title</th>
@@ -18,22 +17,21 @@ const  TodoTable = (props) => {
                     <th><ReactBootstrap.FormControl type="text" placeholder="Search"></ReactBootstrap.FormControl></th>
                 </tr>
             </thead>
-            <body>
-                {props.tableData.length >0 && props.tableData.map((key, value) => {
-                    <tr>
+            <tbody>
+                {props.tabelData.todos.map((value, index) => {
+                    return <tr key={index}>
                     <td>{value.title}</td>
                     <td>{value.person}</td>
                     <td>{value.startDate} to {value.endDate}</td>
                     <td>
-                        <span onClick={props.FormAction('edit',  key)}>Edit</span>
-                        <span onClick={props.FormAction('clone', key)}>Clone</span>
-                        <span onClick={props.FormAction('delete', key)}>Delete</span>
+                        <span onClick={(e)=>props.FormtodoAction('edit',  value)}>Edit</span>
+                        <span onClick={(e)=>props.FormtodoAction('clone', value)}>Clone</span>
+                        <span onClick={(e)=>props.FormtodoAction('delete', value)}>Delete</span>
                     </td>
                 </tr>
                 })}
-            </body>
-        </table>
-        </ReactBootstrap.Container>
+            </tbody>
+        </ReactBootstrap.Table>
     )
 }
 
