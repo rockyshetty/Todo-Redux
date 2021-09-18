@@ -51,7 +51,7 @@ const CreatePerson = () =>{
         }
     }
     return (
-        <ReactBootstrap.Container>
+        <ReactBootstrap.Container cl>
            <ReactBootstrap.Row>
                <ReactBootstrap.Col className="col-md-8">
                <ReactBootstrap.FormControl type="text" value={person.name} onChange={(e)=>personOnChange(e)}></ReactBootstrap.FormControl>

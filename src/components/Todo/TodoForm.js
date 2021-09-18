@@ -74,8 +74,8 @@ const TodoForm = (props) => {
         </ReactBootstrap.Card.Body>
         <ReactBootstrap.Card.Footer className="float-right">
             <ReactBootstrap.Row className="col-md-12  d-flex justify-content-center">
-                <ReactBootstrap.Button className="col-md-5 m-2" onClick={(e)=>props.formSubmit()}>Save</ReactBootstrap.Button>
-                <ReactBootstrap.Button className="col-md-5 m-2" onClick={(e)=>props.formReset()}>Cancel</ReactBootstrap.Button>
+                <ReactBootstrap.Button className="col-md-5 m-2 btn-success" onClick={(e)=>props.formSubmit()}>Save</ReactBootstrap.Button>
+                <ReactBootstrap.Button className="col-md-5 m-2 btn-danger" onClick={(e)=>props.formReset()}>Cancel</ReactBootstrap.Button>
             </ReactBootstrap.Row>
         </ReactBootstrap.Card.Footer>
         </ReactBootstrap.Card>

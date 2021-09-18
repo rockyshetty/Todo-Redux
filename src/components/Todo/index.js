@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Container, Row, Navbar, Nav, Col, Card, CardDeck, ListGroup, ListGroupItem } from 'react-bootstrap';
 import TodoForm from './TodoForm';
 import TodoTable from './TodoTable';
 import CreatePerson from './CreatePerson';
 import * as ReactBootstrap from 'react-bootstrap';
+import { SearchFilter } from '../../common/searchFilter';
 const MainPage = () => {
     const [formstate, setFormState] = useState({
         title: '',
@@ -19,9 +19,20 @@ const MainPage = () => {
         startDate: '',
         endDate: '',
     });
+    const [searchState, setSearchState] = useState({
+        title: '',
+        person: '',
+        description: '',
+        startDate: '',
+        endDate: '',
+    });
     const [overViewState, setoverViewState] = useState({
         todoAction: 'create',
         todos: [],
+        count: 0,
+        active:1,
+        page:5,
+        tableItems:[]
     });
     const [personState, setPersonState] = useState({
         showPopUp: false
@@ -47,7 +58,6 @@ const MainPage = () => {
 
     }
     const formtodoAction = () => {
-        console.log(overViewState);
         switch (overViewState.todoAction) {
             case "create":
                 createNewTodo();
@@ -97,13 +107,7 @@ const MainPage = () => {
             return 
         } else if(! formstate.person.trim()) {
             await commonFormState(
-                setErrorState,
-                errorState,
-                '',
-                'Person is mandatory',
-                '', 
-                errorState.startDate, 
-                errorState.endDate
+                setErrorState, errorState, '', 'Person is mandatory','', errorState.startDate, errorState.endDate
             )
             return 
         } else if (! formstate.startDate || !formstate.endDate) {
@@ -119,13 +123,7 @@ const MainPage = () => {
             return 
         } else if(formstate.startDate > formstate.endDate) {
             await commonFormState(
-                setErrorState,
-                errorState,
-                '',
-                '',
-                '', 
-                "please select correct date",
-                "please select correct date",   
+                setErrorState, errorState, '', '', '', "please select correct date", "please select correct date" 
             )
             return 
         }else if(
@@ -133,13 +131,7 @@ const MainPage = () => {
             overViewState.todoAction !== 'create' && uniqTitles.includes(formstate.title.trim()).length > 1
             ) {
             await commonFormState(
-                setErrorState,
-                errorState,
-                "Please enter unique title",
-                "",
-                "", 
-                "",
-                "",   
+                setErrorState, errorState, "Please enter unique title", "", "", "", ""   
             )
             return 
         }
@@ -209,8 +201,7 @@ const MainPage = () => {
     const formSubmit = async () =>{
         if (await validations()) { 
             await formtodoAction();
-            await commonFormState(setErrorState, errorState, '', '', '', '', ''); //reset all error values
-           await commonFormState(setFormState, formstate, '', '', '', '', '');  //reset all form values
+            await formReset()
         }
     }
 
@@ -218,7 +209,51 @@ const MainPage = () => {
         await commonFormState(setErrorState, errorState, '', '', '', '', ''); //reset all error values
         await commonFormState(setFormState, formstate, '', '', '', '', '');  //reset all form values
     }
-    const PersonPopUp = () =>{
+
+    const TableActions = async(action, data) =>{
+        let {todos} = overViewState;
+        let latestTodo = [];
+        if (action === 'edit') {
+           await commonFormState(setFormState, formstate, data.title, data.person, data.description, data.startDate, data.endDate); 
+        } else if (action === 'delete') {
+            latestTodo = todos.filter(value=>{return value.id !== data.id});
+        } else if (action === 'clone') {
+            data.id = Math.random();
+            latestTodo = todos.push(data);
+        }
+        await setoverViewState({
+            ...overViewState,
+            todos:[...latestTodo]
+        })
+    }
+    const searchFilter = async (e) => {
+        const { name, value } = e.target;
+        if (e.key !== "Delete" || e.key !== "Backspace") {
+            await searchData(name, value);
+            await setSearchState({
+                ...searchState,
+                [name]: value
+            })
+        }
+    }
+    const onKeyUp = async (e) => {
+        if (e.key === "Delete" || e.key === "Backspace") {
+            await searchData();
+        }
+    }
+    const searchData = async (name = '', value = '') => {
+        const { todos,page ,tableItems} = overViewState;
+        let searchResult = await SearchFilter.searchData(name, value, page, todos, searchState);
+        await setoverViewState({
+            ...overViewState,
+            tableItems: searchResult['tableData'],
+            active: 1,
+            count: searchResult['count'],
+            searchTask: searchResult['result']
+        })
+    }
+    
+    const PersonPopUp = () => {
        return <ReactBootstrap.Modal
         size="lg"
         show={personState.showPopUp}
@@ -237,14 +272,21 @@ const MainPage = () => {
     return (
         <ReactBootstrap.Container>
             <ReactBootstrap.Row>
-                <ReactBootstrap.Button className="col-md-2 m-2"  onClick={(e)=>formtodoAction,0}>New Todo</ReactBootstrap.Button>
-                <ReactBootstrap.Button className="col-md-2 m-2" onClick={(e)=>showHidePersonPopUp()}>Persons</ReactBootstrap.Button>
+                <ReactBootstrap.Button className="col-md-2 m-2 btn-light"  onClick={(e)=>formtodoAction,0}>
+                    <i class="fas fa-plus-circle"></i><span className="ml-2">New Todo</span></ReactBootstrap.Button>
+                <ReactBootstrap.Button className="col-md-2 m-2 btn-warning" onClick={(e)=>showHidePersonPopUp()}>
+                    <i class="fas fa-users"></i><span className="pl-2">Persons</span></ReactBootstrap.Button>
             </ReactBootstrap.Row>
             <ReactBootstrap.Row className="mt-2">
-                <ReactBootstrap.Col className="col-md-8">
-                    <TodoTable tabelData={overViewState} FormtodoAction={formtodoAction}/>
+                <ReactBootstrap.Col className="col-md-8 pt-1">
+                    <TodoTable 
+                    tabelData={overViewState} 
+                    FormtodoAction={formtodoAction} 
+                    searchState={searchState}
+                    searchFilter={(e)=>searchFilter(e)}
+                    onKeyUp={(e)=>onKeyUp(e)}/>
                 </ReactBootstrap.Col>
-                <ReactBootstrap.Col className="col-md-4">
+                <ReactBootstrap.Col className="col-md-4 pt-1">
                     <TodoForm
                         formData={formstate}
                         error={errorState}
