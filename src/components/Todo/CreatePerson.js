@@ -1,68 +1,66 @@
-import React, { useRef, useEffect, useState } from "react";
-import { useSelector, useDispatch } from 'react-redux';
+import React, {useRef, useState} from "react";
+import {useSelector, useDispatch} from 'react-redux';
 import {addPersons, removePersons, editPersons} from '../../app/todoPersonSlice'
 import * as ReactBootstrap from 'react-bootstrap';
 
 const CreatePerson = () =>{
     const PersonsList = useSelector((state) => state.persons.value);
+    const personName = useRef();
     const dispatch = useDispatch();
     const [person, setPerson] = useState({
-        name: '',
         action: 'create',
-        editablePersonName: ''
+        editablePerson: ''
     });
 
-    const personOnChange =(e) =>{
-        setPerson({
-            ...person,
-            name: e.target.value
-        })
-    }
-
     const AddNewPerson = () => {
-        let personName = person.name ? person.name.trim() : '';
-        if (personName && ! PersonsList.includes(personName)) {
-            dispatch(addPersons(personName));
+        if (Object.values(PersonsList).includes(personName.current.value)) {
+            dispatch(addPersons(personName.current.value));
             ResetData();
         }
     }
 
     const EditPerson = (value) =>{
+        personName.current.value = Object.values(value)[0];
         setPerson({
             ...person,
-            name: value,
             action: 'edit',
-            editablePersonName: value
+            editablePerson: value
         });
     }
+
     const ResetData = () =>{
+        personName.current.value = '';
         setPerson({
             ...person,
-            name: '',
             action: 'create',
-            editablePersonName: ''
+            editablePerson: ''
         });
     }
+
     const submitEditPerson = () =>{
-        let personName = person.name ? person.name.trim() : '';
-        if (personName && ! PersonsList.includes(personName)) {
-        dispatch(editPersons({oldName:person.editablePersonName,newName:person.name}));
+        if (! Object.values(PersonsList).includes(personName.current.value)) {
+        dispatch(editPersons({[Object.keys(person.editablePerson)[0]] : personName.current.value}));
         ResetData();
         }
     }
+
     return (
-        <ReactBootstrap.Container cl>
+        <ReactBootstrap.Container>
            <ReactBootstrap.Row>
                <ReactBootstrap.Col className="col-md-8">
-               <ReactBootstrap.FormControl type="text" value={person.name} onChange={(e)=>personOnChange(e)}></ReactBootstrap.FormControl>
+               <ReactBootstrap.FormControl type="text" ref={personName}></ReactBootstrap.FormControl>
                </ReactBootstrap.Col>
                <ReactBootstrap.Col className="col-md-4">
-               {person.action === "create" && <ReactBootstrap.Button className="m-1" onClick={(e)=>AddNewPerson()}>
-               Add Person <span class="fas fa-plus-circle pl-1"></span></ReactBootstrap.Button>}
-                {person.action === "edit" && <ReactBootstrap.Button className="m-1" onClick={(e)=>submitEditPerson()}>
-                Edit Person <span class="fas fa-pencil-alt"></span>
+               {person.action === "create" 
+                ? <ReactBootstrap.Button className="m-1" onClick={(e) => AddNewPerson()}>
+                  Add Person<span class="fas fa-plus-circle pl-1"></span>
+                  </ReactBootstrap.Button>
+                : <ReactBootstrap.Button className="m-1" onClick={(e) => submitEditPerson()}>
+                Edit Person<span class="fas fa-pencil-alt"></span>
                 </ReactBootstrap.Button>}
-                <ReactBootstrap.Button onClick={(e) => ResetData()}>Reset <span class="fas fa-sync-alt"></span></ReactBootstrap.Button>
+                <ReactBootstrap.Button onClick={(e) => ResetData()}>
+                    Reset<span class="fas fa-sync-alt"></span>
+                </ReactBootstrap.Button>
                </ReactBootstrap.Col>
            </ReactBootstrap.Row>
            <ReactBootstrap.Row>
@@ -74,12 +72,16 @@ const CreatePerson = () =>{
                        </tr>
                    </thead>
                    <tbody>
-                   {PersonsList.map(value =>{
+                   {Object.entries(PersonsList).map((value, key) =>{
                       return <tr className="col-md-12">
                           <td className="text-right">{value}</td>
                           <td className="text-center">
-                              <span onClick={(e) => EditPerson(value)}><i class="fas fa-edit m-2"  title="Edit Person"></i></span>
-                              <span  onClick={(e) => dispatch(removePersons(value))}><i class="fas fa-trash-alt m-2" title="Remove Person"></i></span>
+                              <span onClick={(e) => EditPerson({[key]: value})}>
+                                  <i class="fas fa-edit m-2"  title="Edit Person"></i>
+                              </span>
+                              <span onClick={(e) => dispatch(removePersons({[key]: value}))}>
+                                  <i class="fas fa-trash-alt m-2" title="Remove Person"></i>
+                              </span>
                            </td>
                       </tr>
                    })}

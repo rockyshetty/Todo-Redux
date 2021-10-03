@@ -1,24 +1,6 @@
-export const SearchFilter = {
-    getPageData,
-    getCountPage,
-    verifyPageNumber,
-    getStates,
-    searchData,
-    getData,
-  }
   const getData = (filedColumn, data) => {
-    //   1 solution
-    // return items.filter(item => {
-    //     for (let key in filedColumn) {
-    //       if ((item[key] !== undefined || item[key].toLowerCase().search(filedColumn[key].toLowerCase()) !== -1))
-    //         return true;
-    //     }
-    //     return false;
-    //   });
-
-    // 2 solution
     return data.filter(item =>
-        Object.entries(filedColumn).every(([key, value]) => value && item[key].toLowerCase().search(value.toLowerCase()) !== -1)
+        Object.entries(filedColumn).every(([key, value]) => value && item[key] && item[key].toLowerCase().search(value.toLowerCase()) !== -1)
       )
   }
 
@@ -32,9 +14,9 @@ export const SearchFilter = {
     return items.slice(currentPage * (id - 1), currentPage * id);
   }
   
-  const getCountPage = (item, allData, currentPage) => {
-    let items = (items.length > 0) ? item : allData;
-    return (items.length > currentPage) ? Math.ceil(items.length / currentPage) : 0;
+  const getCountPage = (items, allData, currentPage) => {
+    let item = (items.length > 0) ? items : allData;
+    return (item.length > currentPage) ? Math.ceil(item.length / currentPage) : 0;
   }
   
   const verifyPageNumber = (initialId, propsId, resonstructedData, currentPage) => {
@@ -52,3 +34,31 @@ export const SearchFilter = {
     let count = getCountPage(result, data, page);
      return {'filledStates': filledStates,'result': result,'tableData': tableData,'count': count}
   }
+
+  /**
+   * This is optional function not related to search filter
+   * @param {*} data 
+   * @param {*} column 
+   * @returns 
+   */
+  const getUniqNumericNotpresentInData =  (data = [], column = 'id') => {
+       let uniqId = Math.floor(Math.random() * (100000 + 1 - 1) + 1);
+       if (data.length > 0) {
+        let dataIds = data.map(value => value[column] );
+        if (! [...new Set(dataIds)].includes(uniqId)) {
+           return uniqId;
+        }
+         getUniqNumericNotpresentInData(data, column)
+       }
+       return uniqId;
+  }
+
+  export const SearchFilter = {
+    getPageData,
+    getCountPage,
+    verifyPageNumber,
+    getStates,
+    searchData,
+    getData,
+    getUniqNumericNotpresentInData,
+  };
