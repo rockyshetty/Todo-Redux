@@ -1,31 +1,24 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo} from "react";
 import * as ReactBootstrap from 'react-bootstrap';
 import Paginator from "../../common/paginator";
 import { SearchFilter } from '../../common/searchFilter';
+import debounce from 'lodash.debounce';
 
 const TodoTable = (props) => {
     const [state, setState] = useState({
-        paginationActive: 1,
-        paginationPagesCount: 0,
-        paginationRowsCount: 5,
+        active: 1,
+        rows: 5,
+        tablePagesCount : 0,
         tableData: [],
         filteredtableData: []
     })
 
-    const title = useRef();
-    const person = useRef();
-    const startDate = useRef();
-    const endDate = useRef();
+    const title = useRef('');
+    const person = useRef('');
+    const startDate = useRef('');
+    const endDate = useRef('');
 
-    useEffect(() => {
-        searchFilter();
-    }, [])
-
-    useEffect(async() => {
-       await searchFilter();
-    }, [props])
-
-    const searchFilter = async () =>{
+    const searchFilter = async (activePageNumber = state.active) =>{
         let searchStates = {
             title: title.current.value,
             person: person.current.value,
@@ -34,21 +27,30 @@ const TodoTable = (props) => {
         }
         
         let searchResult = await SearchFilter.searchData(
-            '',
-            '',
-            state.paginationRowsCount,
-            state.tableData,
-            searchStates);
+            props.tabelData,
+            searchStates,
+            state.rows,
+            activePageNumber
+            );
 
         await setState({
             ...state,
-            tabelData: props.tabelData,
             filteredtableData: searchResult['tableData'],
-            paginationPagesCount: searchResult['count'],
-            paginationActive: 1,
+            tablePagesCount: searchResult['count'],
+            active: activePageNumber
         })
     }
 
+    const changePage = (page) =>{
+        searchFilter(page)
+    }
+
+    useEffect(() => searchFilter(), []);
+
+    const DebounceOnchange = useCallback(debounce(searchFilter,100), []);
+
+    useEffect(() => searchFilter(), [props]);
+    
     return (
         <ReactBootstrap.Card className="overView">
             <ReactBootstrap.Card.Header>
@@ -68,11 +70,9 @@ const TodoTable = (props) => {
                             <th>
                                 <ReactBootstrap.FormControl
                                     type="search"
-                                    placeholder="Search"
                                     name="title"
                                     ref={title}
-                                    onChange={(e) => searchFilter()}
-                                    onKeyUp={(e) => searchFilter()} />
+                                    onChange={(e) => DebounceOnchange()} />
                             </th>
                             <th>
                                 <ReactBootstrap.FormControl
@@ -80,8 +80,7 @@ const TodoTable = (props) => {
                                     placeholder="Search"
                                     name="person"
                                     ref={person}
-                                    onChange={(e) => searchFilter()}
-                                    onKeyUp={(e) => searchFilter()} />
+                                    onChange={(e) => DebounceOnchange()}/>
                             </th>
                             <th>
                                 <ReactBootstrap.FormControl
@@ -89,8 +88,7 @@ const TodoTable = (props) => {
                                     placeholder="Search"
                                     name="startDate"
                                     ref={startDate}
-                                    onChange={(e) => searchFilter()}
-                                    onKeyUp={(e) => searchFilter()} />
+                                    onChange={(e) => DebounceOnchange()}/>
                             </th>
                             <th>
                                 <ReactBootstrap.FormControl
@@ -98,14 +96,13 @@ const TodoTable = (props) => {
                                     placeholder="Search"
                                     name="endDate"
                                     ref={endDate}
-                                    onChange={(e) => searchFilter()}
-                                    onKeyUp={(e) => searchFilter()} />
+                                    onChange={(e) => DebounceOnchange()} />
                             </th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {state.tabelData.map((value, index) => {
+                        {state.filteredtableData && state.filteredtableData.map((value, index) => {
                             return <tr key={index}>
                                 <td>{value.title}</td>
                                 <td>{value.person}</td>
@@ -134,7 +131,11 @@ const TodoTable = (props) => {
                 </ReactBootstrap.Table>
             </ReactBootstrap.Card.Body>
             <ReactBootstrap.Card.Footer className="d-flex justify-content-center  border-top-0 pt-3">
-                <Paginator count={state.paginationPagesCount} active={state.paginationActive}  size="md"/>
+                <Paginator 
+                count={state.tablePagesCount}
+                active={state.active} 
+                changePage={changePage}
+                size="md"/>
             </ReactBootstrap.Card.Footer>
         </ReactBootstrap.Card>
     )

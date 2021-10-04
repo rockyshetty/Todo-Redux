@@ -13,8 +13,8 @@ function pages(count,active,changePage){
   }
   return pages1;
 }
-export default function Paginator({count=0,active=1,changePage,css={},size='sm'}){
-  return(
+export default function Paginator({count = 0, active = 1, changePage, css = {} , size = 'sm'}){
+  return( 
     <Pagination size={size} style={css}>{pages(count,active,changePage)}</Pagination>
   )
 }
