@@ -32,17 +32,17 @@ const TodoTable = (props) => {
             state.rows,
             activePageNumber
             );
-
+            console.log(searchResult);
         await setState({
             ...state,
             filteredtableData: searchResult['tableData'],
             tablePagesCount: searchResult['count'],
-            active: activePageNumber
+            active: searchResult['activePageNumber']
         })
     }
 
-    const changePage = (page) =>{
-        searchFilter(page)
+    const changePage = async (page) =>{
+        await searchFilter(page)
     }
 
     useEffect(() => searchFilter(), []);

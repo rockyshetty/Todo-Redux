@@ -97,9 +97,13 @@ const MainPage = () => {
         <ReactBootstrap.Container>
             <ReactBootstrap.Row>
                 <ReactBootstrap.Button className="col-md-2 m-2 btn-light"  onClick={(e) => newTodo()}>
-                    <i class="fas fa-plus-circle"></i><span className="ml-2">New Todo</span></ReactBootstrap.Button>
+                    <i class="fas fa-plus-circle"></i>
+                    <span className="ml-2">New Todo</span>
+                </ReactBootstrap.Button>
                 <ReactBootstrap.Button className="col-md-2 m-2 btn-warning" onClick={(e) => showHidePersonPopUp()}>
-                    <i class="fas fa-users"></i><span className="pl-2">Persons</span></ReactBootstrap.Button>
+                    <i class="fas fa-users"></i>
+                    <span className="pl-2">Persons</span>
+                </ReactBootstrap.Button>
             </ReactBootstrap.Row>
             <ReactBootstrap.Row className="mt-2">
                 <ReactBootstrap.Col className="col-md-8 pt-1">

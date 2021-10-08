@@ -4,11 +4,12 @@
    * @param {*} data 
    * @returns 
    */
-  const getData = (filedColumn, data) => {
-    return data.filter(item =>
-        Object.entries(filedColumn).every(([index, value]) => item[value[0]].toLowerCase().search(value[1].toLowerCase()) !== -1
-        ) 
-      )
+  const getData = async (filedColumn, data) => {
+      return await data.filter(item => {
+          return Object.keys(filedColumn).every(key => {
+             return item[key].toLowerCase().search(filedColumn[key].toLowerCase()) !== -1
+          })
+      })
   }
 
   /**
@@ -17,7 +18,8 @@
    * @returns 
    */
   const getStates = (searchState = []) =>{
-    return Object.entries(searchState).filter(([key, value])=>{return (key && value && value.length) ? true : false})
+    return Object.fromEntries(
+      Object.entries(searchState).filter(([key, value]) => value && key ) )
   }
  
   /**
@@ -28,9 +30,13 @@
    * @param {*} allData 
    * @returns 
    */
-  const getPageData = (id, currentPage, list, allData) => {
+  const getPageData = async(id, currentPage, list, allData) => {
     let items = (list.length > 0) ? list : allData;
-    return items.slice(currentPage * (id - 1), currentPage * id);
+    let pageData = await items.slice(currentPage * (id - 1), currentPage * id);
+    if (pageData.length < 1 && id > 1) {
+      return await getPageData(1, currentPage, list, allData)
+    }
+    return {'pageData' : pageData, 'activePageNumber' : id}
   }
   
   /**
@@ -69,13 +75,19 @@
    * @param {*} activePageNumber 
    * @returns 
    */
-  const searchData = (data, searchState, rowsCount, activePageNumber) => {
-    let filledStates = getStates(searchState);
-    let result = getData(filledStates, data);
-    let tableData = getPageData(activePageNumber,rowsCount, result, data);
-    let count = getCountPage(result, data, rowsCount);
-     return {'filledStates': filledStates,'result': result,'tableData': tableData,'count': count}
+const searchData = async (data, searchState, rowsCount, activePageNumber) => {
+  let filledStates = await getStates(searchState);
+  let result = await getData(filledStates, data);
+  let tableData = await getPageData(activePageNumber, rowsCount, result, data);
+  let count = await getCountPage(result, data, rowsCount);
+  return {
+    'filledStates': filledStates,
+    'result': result,
+    'tableData': tableData['pageData'],
+    'count': count,
+    'activePageNumber': tableData['activePageNumber']
   }
+}
 
   /**
    * This is optional function not related to search filter
@@ -107,3 +119,41 @@
     getData,
     getUniqNumericNotpresentInData,
   };
+
+
+  /**
+   * Algorithem
+   * 1)Function Name : searchData
+   * 
+   * i)arguements
+   * ->data => full table constructed data
+   * ->searchState => searchFieldStates object which holds key(columnName) and value(searchfieldValue)
+   * ->rowsCount => it is for pagination which rows we need to display in each page
+   * ->activePageNumber => it is active PageNumber in pagination
+   * 
+   * ii)getStates()
+   * ->it will accept searchStates as object and return new object of valid key value i.e, for example 
+   * value lenth greater than zero
+   * 
+   * iii)getdata()
+   * ->it will accept filledStates and original full data it will filter data using searchstate key 
+   * values then it will return filtered array
+   * 
+   * iv)getPageData()
+   * ->arguments it will accept activePageNumber(currentPaginationNumber), rowsCount(number of 
+   * rowscount which we display in table), result(filteredData from previous step),data(originalData)
+   * 
+   * ->if filteredData  length lesser than it will accept original data only for slicing array data by 
+   * pageNumber
+   * ->if pagNumber is greater than 0 and previous step data length < 0 calling same function by making
+   * active pageNumber -1
+   * ->it will return final pageData and activeNumebr because somecases pageNumber and searchdata both
+   *  in active state we will get empty data or error so we doing this step
+   * 
+   * v)getCountPage
+   * ->arguments are filteredData, originalData, numberRowsCount
+   *  
+   * ->if step 3 filteredData length less than zero it will take original array as input and based on
+   *  rows count it will divide the entire data and produces pages count for pagination
+   * 
+   */

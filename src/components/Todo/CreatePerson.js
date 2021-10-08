@@ -5,7 +5,7 @@ import * as ReactBootstrap from 'react-bootstrap';
 
 const CreatePerson = () =>{
     const PersonsList = useSelector((state) => state.persons.value);
-    const personName = useRef();
+    const personName = useRef('');
     const dispatch = useDispatch();
     const [person, setPerson] = useState({
         action: 'create',
